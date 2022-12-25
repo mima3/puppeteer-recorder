@@ -1,6 +1,4 @@
-module.exports = async () => {
-  return {
-    verbose: true,
-    testMatch: ['**/?(*.)+(spec|test).[jt]s?(x)'],
-  };
-};
+module.exports = async () => ({
+  verbose: true,
+  testMatch: ['**/?(*.)+(spec|test).[jt]s?(x)'],
+});

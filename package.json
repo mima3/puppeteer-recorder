@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint *.js",
-    "fix": "eslint *.js --fix",
+    "lint": "eslint src/*.js",
+    "fix": "eslint src/*.js --fix",
     "record": "node src/page_event_capture",
     "replay": "node src/replay"
   },

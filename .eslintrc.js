@@ -12,7 +12,4 @@ module.exports = {
   },
   rules: {
   },
-  env: {
-    'jest/globals': true,
-  },
 };
