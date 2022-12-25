@@ -5,34 +5,35 @@ puppeteerによるブラウザ操作の記録とリプレイ
 node v16.16.0  
 
 ## 使い方
-**セットアップ**
+**セットアップ**  
 
 ```
 npm install
 ```
 
-**ブラウザの操作を記録する**
+**ブラウザの操作を記録する**  
 
 ```
 npm run record http://needtec.sakura.ne.jp/auto_demo/form1.html
 ```
 
-記録が history.json に生成される。
+記録が history.json に生成される。  
+現在、SPAなどで動的にinputやselectを作成するサイトだと正常に動作しない  
 
-**ブラウザの操作を再現する**
+**ブラウザの操作を再現する**  
 
 ```
 npm run replay
 ```
 
-**テストコードの出力**
+**テストコードの出力**  
 hisotry.jsonをもとにgeneratedフォルダにテストコードを出力する
 
 ```
 npm run generate
 ```
 
-**テストコード実行**
+**テストコード実行**  
 
 ```
 npm run checkTestCode
