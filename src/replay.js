@@ -2,15 +2,15 @@
 const ReplayController = require('./ReplayController');
 
 (async () => {
-  const history = new ReplayController('history.json', {
+  const replay = new ReplayController('history.json', {
     waitOperation: true,
   });
-  console.log(history);
+  console.log(replay);
   let result = false;
-  await history.start();
+  await replay.start();
   do {
     // eslint-disable-next-line no-await-in-loop
-    result = await history.step();
+    result = await replay.step();
   } while (result);
-  history.stop();
+  await replay.stop();
 })();

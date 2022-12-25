@@ -54,6 +54,10 @@ function ask() {
       console.log('start...capture page', pages);
     }
   });
+  browser.on('targetchanged', async (target) => {
+    // eslint-disable-next-line no-underscore-dangle
+    console.log('targetchanged', target._targetId, target.type());
+  });
   try {
     await startPage.goto(url);
     // 終了を待機

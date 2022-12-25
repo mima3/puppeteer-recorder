@@ -26,6 +26,11 @@ class PageCaptureController {
         args,
       });
     });
+    page.on('frameattached', async (frame) => {
+      // frameが取り付けられた場合
+      console.log('frameattached.....', frame.url(), frame);
+    });
+
     page.on('dialog', (dialog) => {
       // ダイアログを表示した場合にイベントが発火する
       console.log('次のダイアログが表示された', dialog.message(), dialog.type());
