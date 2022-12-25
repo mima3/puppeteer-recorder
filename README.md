@@ -37,3 +37,18 @@ npm run generate
 ```
 npm run checkTestCode
 ```
+
+現在は手で以下のような検証コードを記載する必要がある.  
+
+```
+  {
+    /* 指定の要素のテキストを確認する */
+    const option = {
+      useIframe: true,
+      frameUrl: 'http://hogehoge',
+    };
+    await preparePage(0, 'http://hogehoge', 0);
+    const ret = await puppeteerWrap.getElementProperty('//body/table/tbody/tr[1]/td[2]', 'textContent', option);
+    expect(ret).toEqual('aaaa');
+  }
+```
