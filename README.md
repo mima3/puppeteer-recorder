@@ -24,3 +24,16 @@ npm run record http://needtec.sakura.ne.jp/auto_demo/form1.html
 ```
 npm run replay
 ```
+
+**テストコードの出力**
+hisotry.jsonをもとにgeneratedフォルダにテストコードを出力する
+
+```
+npm run generate
+```
+
+**テストコード実行**
+
+```
+npm run checkTestCode
+```

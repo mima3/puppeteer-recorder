@@ -8,7 +8,9 @@
     "lint": "eslint src/*.js",
     "fix": "eslint src/*.js --fix",
     "record": "node src/page_event_capture",
-    "replay": "node src/replay"
+    "replay": "node src/replay",
+    "generate": "node src/generate",
+    "checkTestCode": "jest generated/generated.spec.js"
   },
   "keywords": [],
   "author": "",

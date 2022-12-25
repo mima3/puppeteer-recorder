@@ -102,6 +102,14 @@ class PuppeteerWrapper {
     if (option.useIframe) {
       const lastPath = option.frameUrl.split('/').pop();
       let targetFrame = null;
+      /*
+      await PuppeteerWrapper.doLoop(frames, async (frame) => {
+        const src = await (await frame.getProperty('src')).jsonValue();
+        if (src.indexOf(lastPath) !== -1) {
+          targetFrame = await frame.contentFrame();
+        }
+      });
+      */
       await PuppeteerWrapper.doLoop(this.page.frames(), async (frame) => {
         const url = frame.url();
         if (url.indexOf(lastPath) !== -1) {
@@ -119,6 +127,12 @@ class PuppeteerWrapper {
     return element;
   }
 
+  async getElementProperty(xpath, prop, option) {
+    const element = await this.selectElement(xpath, option);
+    const result = await (await element.getProperty(prop)).jsonValue();
+    return result;
+  }
+
   async click(xpath, option = {}) {
     console.log('click...');
     const element = await this.selectElement(xpath, option);
@@ -126,16 +140,19 @@ class PuppeteerWrapper {
   }
 
   async type(xpath, value, option = {}) {
+    console.log('type...');
     const element = await this.selectElement(xpath, option);
     await element.type(value);
   }
 
   async select(xpath, selectedOptions, option = {}) {
+    console.log('select...');
     const element = await this.selectElement(xpath, option);
     await element.select(...selectedOptions);
   }
 
   handleDialog(callback) {
+    console.log('handleDialog...');
     this.page.once('dialog', async (dialog) => {
       callback(dialog);
     });
