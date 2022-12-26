@@ -221,7 +221,7 @@ function pageScript() {
       monitorTextArea(evt.target);
     } else if (evt.target.tagName === 'SELECT') {
       monitorSelect(evt.target);
-    } 
+    }
   }, eventListenerOption);
 
   function registerLoadEvents() {

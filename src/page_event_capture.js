@@ -69,8 +69,13 @@ function ask() {
     console.log(history);
     console.log(targetIdList);
     // targetIdの変換
-    for (const item of history) {
-      item.targetId = targetIdList.indexOf(item.targetId);
+    for (let ix = 0; ix < history.length; ix += 1) {
+      history[ix].targetId = targetIdList.indexOf(history[ix].targetId);
+      if (ix > 0 && history[ix].name === 'dialog') {
+        const swapItem = history[ix];
+        history[ix] = history[ix - 1];
+        history[ix - 1] = swapItem;
+      }
     }
     console.log(history);
     fs.writeFileSync('history.json', JSON.stringify(history, null, '  '));
