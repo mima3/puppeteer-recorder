@@ -70,7 +70,9 @@ function pageScript() {
    * @returns
    */
   function getSelector(element) {
+    console.log('getSelector...');
     if (!element) {
+      console.log('elementがない');
       return '';
     }
     // 指定の要素
@@ -79,7 +81,17 @@ function pageScript() {
     let path = '';
     for (const info of infos) {
       if (info.id) {
-        return join(`//${info.tagName}[@id='${info.id}']`, path);
+        const tmpPath = join(`//${info.tagName}[@id='${info.id}']`, path);
+        if (document.evaluate(
+          tmpPath,
+          document,
+          null,
+          XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+          null,
+        ).snapshotLength === 1) {
+          // XPATHで唯一のタグが選択できた場合
+          return tmpPath;
+        }
       }
       if (info.classList.length > 0) {
         const tmpPath = join(`//${info.tagName}[@class='${info.classList}']`, path);
@@ -137,55 +149,95 @@ function pageScript() {
     };
   }
 
+  const events = {};
+  const eventListenerOption = {
+    capture: true,
+  };
+  function monitorInput(input) {
+    const xpath = getSelector(input);
+    if (events[xpath]) {
+      return;
+    }
+    input.addEventListener('change', (evt) => {
+      console.log('change..input');
+      const args = createDefaultArgs(evt);
+      args.value = evt.target.value;
+      if (evt.target.type === 'checkbox' || evt.target.type === 'radio') {
+        args.checked = evt.target.checked;
+      }
+      window.onCustomEvent('change_input', args);
+    }, eventListenerOption);
+    events[xpath] = input;
+  }
+
+  function monitorTextArea(textArea) {
+    const xpath = getSelector(textArea);
+    if (events[xpath]) {
+      return;
+    }
+    textArea.addEventListener('change', (evt) => {
+      const args = createDefaultArgs(evt);
+      args.value = evt.target.value;
+      window.onCustomEvent('change_textarea', args);
+    }, eventListenerOption);
+    events[xpath] = textArea;
+  }
+  function monitorSelect(select) {
+    const xpath = getSelector(select);
+    if (events[xpath]) {
+      return;
+    }
+    select.addEventListener('change', (evt) => {
+      const args = createDefaultArgs(evt);
+      args.value = evt.target.value;
+      const selectedOptions = [];
+      for (const option of evt.target.options) {
+        if (option.selected) {
+          selectedOptions.push({
+            value: option.value,
+            text: option.textContent,
+          });
+        }
+      }
+      args.selectedOptions = selectedOptions;
+      window.onCustomEvent('change_select', args);
+    }, eventListenerOption);
+    events[xpath] = select;
+  }
   // クリックイベントをpuppeteerに通知
   window.addEventListener('click', (evt) => {
     const args = createDefaultArgs(evt);
+    console.log('click', args.xpath, evt.target, evt.target.offsetWidth, evt.target.offsetHeight, evt.target.style.display, evt.target.disabled);
+    if (evt.target.offsetHeight === 0 || evt.target.offsetWidth === 0 || evt.target.style.display === 'none' || evt.target.disabled) {
+      console.log('skip...', evt.target.clientWidth, evt.target.clientHeight, evt.target.style.display, evt.target.disabled);
+      return;
+    }
     args.x = evt.x;
     args.y = evt.y;
     window.onCustomEvent(evt.type, args);
-  });
+    if (evt.target.tagName === 'INPUT') {
+      monitorInput(evt.target);
+    } else if (evt.target.tagName === 'TEXTAREA') {
+      monitorTextArea(evt.target);
+    }
+  }, eventListenerOption);
 
   function registerLoadEvents() {
     console.log('load....');
     // inputの変更イベントをpuppeteerに通知
     const inputs = window.document.getElementsByTagName('input');
     for (const input of inputs) {
-      input.addEventListener('change', (evt) => {
-        const args = createDefaultArgs(evt);
-        args.value = evt.target.value;
-        if (evt.target.type === 'checkbox' || evt.target.type === 'radio') {
-          args.checked = evt.target.checked;
-        }
-        window.onCustomEvent('change_input', args);
-      });
+      monitorInput(input);
     }
     // textareaの変更イベントをpuppeteerに通知
     const textAreas = window.document.getElementsByTagName('textarea');
     for (const textArea of textAreas) {
-      textArea.addEventListener('change', (evt) => {
-        const args = createDefaultArgs(evt);
-        args.value = evt.target.value;
-        window.onCustomEvent('change_textarea', args);
-      });
+      monitorTextArea(textArea);
     }
     // selectの変更イベントをpuppeteerに通知
     const selects = window.document.getElementsByTagName('select');
     for (const select of selects) {
-      select.addEventListener('change', (evt) => {
-        const args = createDefaultArgs(evt);
-        args.value = evt.target.value;
-        const selectedOptions = [];
-        for (const option of evt.target.options) {
-          if (option.selected) {
-            selectedOptions.push({
-              value: option.value,
-              text: option.textContent,
-            });
-          }
-        }
-        args.selectedOptions = selectedOptions;
-        window.onCustomEvent('change_select', args);
-      });
+      monitorSelect(select);
     }
   }
   if (window.document.readyState === 'complete') {

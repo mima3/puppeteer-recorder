@@ -95,7 +95,7 @@ class TestCodeGenerator {
     /* 要素「${this.createMemo(item)}」をクリックする */
 ${this.createOption(item)}
     await preparePage(${item.targetId}, '${item.url}', ${sleepTime});
-    await puppeteerWrap.click('${item.args.xpath}', option);
+    await puppeteerWrap.click("${item.args.xpath}", option);
   }
 `;
     return result;
@@ -106,7 +106,7 @@ ${this.createOption(item)}
     /* 要素「${this.createMemo(item)}」」に対してキーボードで値を入力する */
 ${this.createOption(item)}
     await preparePage(${item.targetId}, '${item.url}', ${sleepTime});
-    await puppeteerWrap.type('${item.args.xpath}', '${item.args.value}', option);
+    await puppeteerWrap.type("${item.args.xpath}", '${item.args.value}', option);
   }
 `;
     return result;
@@ -119,7 +119,7 @@ ${this.createOption(item)}
     /* 要素「${this.createMemo(item)}」に対して選択を行う */
 ${this.createOption(item)}
     await preparePage(${item.targetId}, '${item.url}', ${sleepTime});
-    await puppeteerWrap.select('${item.args.xpath}', ${JSON.stringify(selectedOptions)}, option);
+    await puppeteerWrap.select("${item.args.xpath}", ${JSON.stringify(selectedOptions)}, option);
   }
 `;
     return result;

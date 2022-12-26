@@ -45,6 +45,14 @@ class PageCaptureController {
         },
       });
     });
+
+    page.on('console', (message) => {
+      console.log(`[${this.targetId}] ${message.type().substr(0, 3).toUpperCase()} ${message.text()}`);
+      // eslint-disable-next-line no-restricted-syntax
+      for (const obj of message.args()) {
+        console.log('  ', obj);
+      }
+    });
   }
 }
 module.exports = PageCaptureController;

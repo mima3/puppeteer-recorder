@@ -21,7 +21,11 @@ class PuppeteerWrapper {
     this.targets = [];
     this.browser = await puppeteer.launch({
       headless: false,
-      args: ['--no-sandbox', '--lang=ja'],
+      args: ['--no-sandbox', '--lang=ja', '--window-size=1280,760'],
+      defaultViewport: {
+        width: 1270,
+        height: 760,
+      },
     });
     this.browser.on('targetcreated', async (target) => {
       // eslint-disable-next-line no-underscore-dangle
@@ -121,7 +125,9 @@ class PuppeteerWrapper {
       }
       root = targetFrame;
     }
-    await root.waitForXPath(xpath);
+    await root.waitForXPath(xpath, {
+      visible: option.visible,
+    });
     const elements = await root.$x(xpath);
     element = elements.at(0);
     return element;
@@ -135,6 +141,8 @@ class PuppeteerWrapper {
 
   async click(xpath, option = {}) {
     console.log('click...');
+    // eslint-disable-next-line no-param-reassign
+    option.visible = true;
     const element = await this.selectElement(xpath, option);
     await element.click();
   }

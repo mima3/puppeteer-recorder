@@ -31,7 +31,11 @@ function ask() {
   const pages = {};
   const browser = await puppeteer.launch({
     headless: false,
-    args: ['--no-sandbox', '--lang=ja'],
+    args: ['--no-sandbox', '--lang=ja', '--window-size=1280,760'],
+    defaultViewport: {
+      width: 1270,
+      height: 760,
+    },
   });
   const targetIdList = [];
   async function registerPage(targetId, page) {
