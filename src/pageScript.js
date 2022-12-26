@@ -219,7 +219,9 @@ function pageScript() {
       monitorInput(evt.target);
     } else if (evt.target.tagName === 'TEXTAREA') {
       monitorTextArea(evt.target);
-    }
+    } else if (evt.target.tagName === 'SELECT') {
+      monitorSelect(evt.target);
+    } 
   }, eventListenerOption);
 
   function registerLoadEvents() {
