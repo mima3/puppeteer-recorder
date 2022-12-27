@@ -18,7 +18,6 @@ npm run record http://needtec.sakura.ne.jp/auto_demo/form1.html
 ```
 
 記録が history.json に生成される。  
-現在、SPAなどで動的にinputやselectを作成するサイトだと正常に動作しない  
 
 **ブラウザの操作を再現する**  
 
