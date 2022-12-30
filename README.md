@@ -17,7 +17,14 @@ npm install
 npm run record http://needtec.sakura.ne.jp/auto_demo/form1.html
 ```
 
-記録が history.json に生成される。  
+標準入力でコマンドを入力することで操作について
+
+|コマンド|説明|
+|:---|:----|
+|exit|現在の履歴をhistory.jsonで保存する|
+|assert|次にクリックした要素のテキストをassertで確認する|
+|html-validate|[html-validate](https://html-validate.org/)現在表示しているHTMLに対してHtmlValidateを実行する|
+
 
 **ブラウザの操作を再現する**  
 

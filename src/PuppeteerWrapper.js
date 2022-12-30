@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable no-restricted-syntax */
 const puppeteer = require('puppeteer');
+const { HtmlValidate } = require('html-validate');
 
 // eslint-disable-next-line no-promise-executor-return
 const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
@@ -11,6 +12,7 @@ class PuppeteerWrapper {
     this.browser = null;
     this.targets = [];
     this.page = null;
+    this.htmlValidate = new HtmlValidate();
   }
 
   /**
@@ -168,6 +170,16 @@ class PuppeteerWrapper {
 
   async waitForNavigation() {
     await this.page.waitForNavigation();
+  }
+
+  /**
+   * 現在表示中のHTMLの検証を行う
+   * @returns Report outputs
+   */
+  async runHtmlValidate() {
+    const src = await this.page.evaluate(() => (document.documentElement.outerHTML));
+    const ret = this.htmlValidate.validateString(src);
+    return ret;
   }
 }
 module.exports = PuppeteerWrapper;

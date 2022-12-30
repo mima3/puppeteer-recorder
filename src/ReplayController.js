@@ -57,15 +57,17 @@ class ReplayController {
 
   async do(item) {
     console.log('....', item);
-    await this.puppeteer.switchTarget(item.targetId);
-    if (item.url) {
-      if (this.option.waitOperation) {
-        await this.waitOperation(item.time);
+    if (item.targetId !== -1) {
+      await this.puppeteer.switchTarget(item.targetId);
+      if (item.url) {
+        if (this.option.waitOperation) {
+          await this.waitOperation(item.time);
+        }
+        if (item.url !== this.puppeteer.currentUrl) {
+          await this.puppeteer.waitForNavigation();
+        }
+        assert(item.url === this.puppeteer.currentUrl);
       }
-      if (item.url !== this.puppeteer.currentUrl) {
-        await this.puppeteer.waitForNavigation();
-      }
-      assert(item.url === this.puppeteer.currentUrl);
     }
     const option = {
       useIframe: item.args.iframe,
