@@ -125,6 +125,16 @@ class RecorderController {
     this.appendHistory(-1, '', 'runHtmlValidator', {});
   }
 
+  async dump(rootDir) {
+    const promiseList = [];
+    for (const targetId of Object.keys(this.pages)) {
+      const pageCtrl = this.pages[targetId];
+      promiseList.push(pageCtrl.dump(rootDir));
+    }
+    await Promise.all(promiseList);
+    console.log(`[log]${rootDir}にHTMLの完全な内容をダンプしました`);
+  }
+
   async close() {
     if (this.browser) {
       await this.browser.close();
@@ -156,6 +166,10 @@ async function waitAsk() {
       case 'html-validate':
         // eslint-disable-next-line no-await-in-loop
         await recorderController.runHtmlValidator();
+        break;
+      case 'dump':
+        // eslint-disable-next-line no-await-in-loop
+        await recorderController.dump('cache');
         break;
       default:
     }

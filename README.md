@@ -24,6 +24,7 @@ npm run record http://needtec.sakura.ne.jp/auto_demo/form1.html
 |exit|現在の履歴をhistory.jsonで保存する|
 |assert|次にクリックした要素のテキストをassertで確認する|
 |html-validate|[html-validate](https://html-validate.org/)現在表示しているHTMLに対してHtmlValidateを実行する|
+|dump|現在のhtmlの内容を完全な状態でcacheフォルダにダンプする|
 
 
 **ブラウザの操作を再現する**  
