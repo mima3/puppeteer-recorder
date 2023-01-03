@@ -21,6 +21,7 @@ class PuppeteerWrapper {
    */
   async start(url) {
     this.targets = [];
+    console.log('start launch')
     this.browser = await puppeteer.launch({
       headless: false,
       args: ['--no-sandbox', '--lang=ja', '--window-size=1280,760'],
@@ -29,6 +30,7 @@ class PuppeteerWrapper {
         height: 760,
       },
     });
+    console.log('start targetcreated')
     this.browser.on('targetcreated', async (target) => {
       // eslint-disable-next-line no-underscore-dangle
       console.log('targetcreated', target._targetId, target.type());
@@ -37,7 +39,9 @@ class PuppeteerWrapper {
         this.targets.push(page);
       }
     });
+    console.log('wait new Page start')
     const page = await this.browser.newPage();
+    console.log('wait new Page end')
     const waitForNavigation = page.waitForNavigation();
     await page.goto(url);
     this.page = page;

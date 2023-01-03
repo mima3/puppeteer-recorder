@@ -47,7 +47,7 @@ class PageCaptureController {
       );
     });
 
-    page.on('console', (message) => {
+    page.on('console', (/*message*/) => {
       /*
       // eslint-disable-next-line max-len
       console.log(`[${this.targetId}] ${message.type().substr(0, 3).toUpperCase()} ${message.text()}`);

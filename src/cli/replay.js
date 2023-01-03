@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-const ReplayController = require('./ReplayController');
+const ReplayController = require('../utility/ReplayController');
 
 (async () => {
   const replay = new ReplayController('history.json', {

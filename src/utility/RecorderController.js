@@ -1,35 +1,25 @@
-/* eslint-disable no-console */
-/* eslint-disable no-restricted-syntax */
-const puppeteer = require('puppeteer');
-const { ArgumentParser } = require('argparse');
-const { HtmlValidate } = require('html-validate');
-
 const fs = require('fs');
-const rlp = require('readline');
+const { HtmlValidate } = require('html-validate');
 const PageCaptureController = require('./PageCaptureController');
-
-const parser = new ArgumentParser({ description: 'recording browser operation.' });
-
-parser.add_argument('url', {
-  type: 'string',
-});
-parser.add_argument('-o', '--output', {
-  default: 'history.json',
-  help: 'output history json file path.',
-});
-const args = parser.parse_args();
-console.log(args);
-
-const { url } = args;
+const PCR = require("puppeteer-chromium-resolver");
+const puppeteer = require('puppeteer');
 
 class RecorderController {
   constructor() {
     this.history = [];
-    this.mode = 'capture';
+    this.mode = 'init';
     this.targetIdList = [];
     this.pages = {};
     this.browser = null;
     this.htmlValidate = new HtmlValidate();
+    this.onChangeMode = null;
+  }
+
+  changeMode(mode) {
+    this.mode = mode;
+    if (this.onChangeMode) {
+      this.onChangeMode(mode)
+    }
   }
 
   // eslint-disable-next-line no-shadow
@@ -37,7 +27,7 @@ class RecorderController {
     if (this.mode === 'assert' && name === 'click') {
       // eslint-disable-next-line no-param-reassign
       name = 'assert';
-      this.mode = 'capture';
+      this.changeMode('capture');
       console.log('*操作を記録中です');
     }
     this.history.push({
@@ -71,8 +61,11 @@ class RecorderController {
 
   // eslint-disable-next-line no-shadow
   async launch(url) {
+    const stats = await PCR();
+    console.log('launch', url, stats.executablePath)
     this.browser = await puppeteer.launch({
       headless: false,
+      executablePath: stats.executablePath,
       args: ['--no-sandbox', '--lang=ja', '--window-size=1280,760'],
       defaultViewport: {
         width: 1270,
@@ -98,6 +91,7 @@ class RecorderController {
       console.log('[log] targetchanged', target._targetId, target.type());
     });
     await startPage.goto(url);
+    this.changeMode('capture');
   }
 
   async runHtmlValidator() {
@@ -138,58 +132,8 @@ class RecorderController {
   async close() {
     if (this.browser) {
       await this.browser.close();
+      this.changeMode('init')
     }
   }
 }
-
-const recorderController = new RecorderController();
-const rl = rlp.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
-
-function ask() {
-  return new Promise((resolve) => {
-    rl.question(`>command: [${recorderController.mode}]`, (input) => {
-      resolve(input);
-    });
-  });
-}
-async function waitAsk() {
-  let input = await ask();
-  while (input !== 'exit') {
-    switch (input) {
-      case 'assert': {
-        recorderController.mode = 'assert';
-        break;
-      }
-      case 'html-validate':
-        // eslint-disable-next-line no-await-in-loop
-        await recorderController.runHtmlValidator();
-        break;
-      case 'dump':
-        // eslint-disable-next-line no-await-in-loop
-        await recorderController.dump('cache');
-        break;
-      default:
-    }
-    // eslint-disable-next-line no-await-in-loop
-    input = await ask();
-  }
-  rl.close();
-}
-
-// メインのロジック
-(async () => {
-  try {
-    recorderController.launch(url);
-    // 終了を待機
-    await waitAsk();
-    recorderController.saveHistory('history.json');
-  } catch (err) {
-    // エラーが起きた際の処理
-    console.error('エラーが発生', err);
-  } finally {
-    await recorderController.close();
-  }
-})();
+module.exports = RecorderController;

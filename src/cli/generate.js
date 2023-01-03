@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 const fs = require('fs');
-const TestCodeGenerator = require('./TestCodeGenerator');
+const TestCodeGenerator = require('../utility/TestCodeGenerator');
 
 (async () => {
   const generator = new TestCodeGenerator('history.json');
