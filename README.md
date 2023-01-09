@@ -61,4 +61,10 @@ npm run checkTestCode
 ```
 
 ## GUIの使い方
-TODO
+GUIでのレコーダーたの起動
+
+```
+npm run serve
+```
+
+urlを入力後、「起動」ボタンを押下する。
