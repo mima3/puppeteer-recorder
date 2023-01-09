@@ -105,18 +105,26 @@ class RecorderController {
         })),
       );
     }
+    const validatedResult = [];
     const htmlSrcList = await Promise.all(htmlList);
     for (const htmlSrc of htmlSrcList) {
       const ret = this.htmlValidate.validateString(htmlSrc.html);
-      console.log('----------------------------');
-      console.log(htmlSrc.url);
+      // validatedResult.append(htmlSrc.url);
+      const item = {
+        url: htmlSrc.url,
+        html: htmlSrc.html,
+        messages: []
+      }
       for (const result of ret.results) {
         for (const message of result.messages) {
           console.log(message);
+          item.messages.push(message);
         }
       }
+      validatedResult.push(item);
     }
     this.appendHistory(-1, '', 'runHtmlValidator', {});
+    return validatedResult;
   }
 
   async dump(rootDir) {

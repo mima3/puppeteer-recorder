@@ -4,9 +4,9 @@ import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 import RecorderController from '@/utility/RecorderController'
+const log = require('electron-log');
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
-
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
@@ -90,6 +90,7 @@ recorderController.onChangeMode = (mode) => {
 }
 
 ipcMain.on('recorder:startRecord', async (event, arg) => {
+  log.info('recorder:startRecord', arg)
   await recorderController.launch(arg.url)
   event.sender.send('background:log', { message: '正常に起動しました' })
 })
@@ -98,4 +99,11 @@ ipcMain.on('recorder:endRecord', async (event, arg) => {
   recorderController.saveHistory(arg.dist)
   await recorderController.close()
   event.sender.send('background:log', { message: `${arg.dist}に保存しました` })
+})
+
+ipcMain.on('recorder:runHtmlValidator', async (event, arg) => {
+  log.info('recorder:runHtmlValidator', arg)
+  const result = await recorderController.runHtmlValidator()
+  log.info('recorder:runHtmlValidator', result)
+  event.sender.send('background:runHtmlValidator', result)
 })
