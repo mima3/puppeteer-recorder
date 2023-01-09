@@ -13,6 +13,7 @@ class RecorderController {
     this.browser = null;
     this.htmlValidate = new HtmlValidate();
     this.onChangeMode = null;
+    this.onAppendHistory = null;
   }
 
   changeMode(mode) {
@@ -30,13 +31,17 @@ class RecorderController {
       this.changeMode('capture');
       console.log('*操作を記録中です');
     }
-    this.history.push({
+    const item = {
       time: Date.now(),
       targetId,
       url,
       name,
       args,
-    });
+    };
+    this.history.push(item);
+    if (this.onAppendHistory) {
+      this.onAppendHistory(item);
+    }
   }
 
   saveHistory(outputPath) {

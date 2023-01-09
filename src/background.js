@@ -86,7 +86,12 @@ if (isDevelopment) {
 const recorderController = new RecorderController()
 
 recorderController.onChangeMode = (mode) => {
-  mainWindow.webContents.send('background:log', { message: `MODEの変更が発生しました　${mode}` })
+  mainWindow.webContents.send('background:onChangeMode', mode)
+  mainWindow.webContents.send('background:log', { message:`MODEの変更が発生しました ${mode}`})
+}
+
+recorderController.onAppendHistory = (item) => {
+  mainWindow.webContents.send('background:onAppendHistory', item)
 }
 
 ipcMain.on('recorder:startRecord', async (event, arg) => {
@@ -106,4 +111,10 @@ ipcMain.on('recorder:runHtmlValidator', async (event, arg) => {
   const result = await recorderController.runHtmlValidator()
   log.info('recorder:runHtmlValidator', result)
   event.sender.send('background:runHtmlValidator', result)
+})
+
+ipcMain.on('recorder:startAssert', (event, arg) => {
+  log.info('recorder:startAssert', arg)
+  recorderController.changeMode('assert');
+  event.sender.send('background:log', { message: `assert用の要素を選択してください` })
 })
