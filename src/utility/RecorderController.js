@@ -14,6 +14,7 @@ class RecorderController {
     this.htmlValidate = new HtmlValidate();
     this.onChangeMode = null;
     this.onAppendHistory = null;
+    this.startUrl = null;
   }
 
   changeMode(mode) {
@@ -54,7 +55,10 @@ class RecorderController {
         this.history[ix - 1] = swapItem;
       }
     }
-    fs.writeFileSync(outputPath, JSON.stringify(this.history, null, '  '));
+    fs.writeFileSync(outputPath, JSON.stringify({
+      startUrl: this.startUrl,
+      history: this.history,
+    }, null, '  '));
   }
 
   async registerPage(targetId, page) {
@@ -67,7 +71,8 @@ class RecorderController {
   // eslint-disable-next-line no-shadow
   async launch(url) {
     const stats = await PCR();
-    console.log('launch', url, stats.executablePath)
+    console.log('launch', url, stats.executablePath);
+    this.startUrl = url;
     this.browser = await puppeteer.launch({
       headless: false,
       executablePath: stats.executablePath,

@@ -10,7 +10,9 @@ const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 class ReplayController {
   constructor(historyPath, option = {}) {
     const text = fs.readFileSync(historyPath);
-    this.history = JSON.parse(text);
+    const historyInfo = JSON.parse(text);
+    this.history = historyInfo.history;
+    this.startUrl = historyInfo.startUrl;
     this.currentIndex = 0;
     this.option = option;
     this.startTime = 0;
@@ -26,7 +28,7 @@ class ReplayController {
     this.currentIndex = 0;
     this.startTime = Date.now();
     this.operationTimeBaseline = this.history[0].time;
-    await this.puppeteer.start(this.history[0].url);
+    await this.puppeteer.start(this.startUrl);
   }
 
   async stop() {

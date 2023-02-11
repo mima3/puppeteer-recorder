@@ -35,14 +35,16 @@ ${tests}
 class TestCodeGenerator {
   constructor(historyPath) {
     const text = fs.readFileSync(historyPath);
-    this.history = JSON.parse(text);
+    const historyInfo = JSON.parse(text);
+    this.history = historyInfo.history;
+    this.startUrl = historyInfo.startUrl;
   }
 
   parse() {
     let libCode = fs.readFileSync(`${__dirname}/puppeteerWrapper.js`, 'utf-8');
     libCode = libCode.replaceAll('module.exports = puppeteerWrapper;\n', '');
     let testCode = '';
-    const operationTimeBaseline = this.history[0].time;
+    const operationTimeBaseline = this.startUrl;
     for (const item of this.history) {
       const opeTimeDiff = item.time - operationTimeBaseline;
       console.log(item.name);
@@ -84,7 +86,7 @@ class TestCodeGenerator {
         default:
       }
     }
-    const result = testCodeTemplate(this.history[0].url, libCode, testCode);
+    const result = testCodeTemplate(this.startUrl, libCode, testCode);
     return result;
   }
 
