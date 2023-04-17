@@ -44,7 +44,7 @@ class TestCodeGenerator {
     let libCode = fs.readFileSync(`${__dirname}/puppeteerWrapper.js`, 'utf-8');
     libCode = libCode.replaceAll('module.exports = puppeteerWrapper;\n', '');
     let testCode = '';
-    const operationTimeBaseline = this.startUrl;
+    const operationTimeBaseline = this.history[0].time;
     for (const item of this.history) {
       const opeTimeDiff = item.time - operationTimeBaseline;
       console.log(item.name);

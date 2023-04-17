@@ -62,15 +62,25 @@ class PageCaptureController {
     });
 
     page.on('response', async (res) => {
+      const status = res.status()
+      // https://stackoverflow.com/questions/48986851/puppeteer-get-request-redirects/48988718#48988718
+      if ((status >= 300) && (status <= 399)) {
+        console.log('Redirect from', res.url(), 'to', res.headers()['location'])
+        return
+      }
       console.log('response', res.url(), res.headers, res.status());
-      const mimeType = res.headers()['content-type'];
-      const buffer = await res.buffer();
-      this.responseHistory.push({
-        time: Date.now(),
-        url: res.url(),
-        mimeType,
-        buffer,
-      });
+      try {
+        const mimeType = res.headers()['content-type'];
+        const buffer = await res.buffer();
+        this.responseHistory.push({
+          time: Date.now(),
+          url: res.url(),
+          mimeType,
+          buffer,
+        });
+      } catch (ex) {
+        console.error(ex)
+      }
       /*
       const {
         pathname,
