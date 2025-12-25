@@ -1,0 +1,88 @@
+version: 0.2
+
+env:
+  variables:
+    SONAR_HOST_URL: "http://localhost:9000"
+    SONAR_PROJECT_KEY: "local_test"
+    LOCAL_FORWARD_PORT: "9000"
+    REMOTE_SONAR_PORT: "9000"
+    # 必要ならリージョン固定
+    AWS_REGION: "ap-northeast-1"
+  # 例: SSMパラメータストアから注入（SecureString推奨）
+  parameter-store:
+    SONAR_TOKEN: "/sonarqube/token"
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+    commands:
+      - set -euo pipefail
+      - echo "Install Session Manager plugin (for aws ssm start-session)..."
+      # CodeBuild Standard イメージ想定。無ければインストール。
+      - |
+        if ! command -v session-manager-plugin >/dev/null 2>&1; then
+          curl -fsSL "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/linux_64bit/session-manager-plugin.rpm" -o /tmp/session-manager-plugin.rpm
+          rpm -i /tmp/session-manager-plugin.rpm
+        fi
+      - aws --version
+      - session-manager-plugin --version || true
+
+  pre_build:
+    commands:
+      - echo "Find running EC2 instance for SonarQube (tag Name=sonarqube)..."
+      - |
+        INSTANCE_ID="$(
+          aws ec2 describe-instances \
+            --region "$AWS_REGION" \
+            --filters "Name=tag:Name,Values=sonarqube" "Name=instance-state-name,Values=running" \
+            --query "Reservations[].Instances[].InstanceId | [0]" \
+            --output text
+        )"
+      - |
+        if [ "$INSTANCE_ID" = "None" ] || [ -z "$INSTANCE_ID" ]; then
+          echo "ERROR: No running instance found with tag Name=sonarqube"
+          exit 1
+        fi
+      - echo "INSTANCE_ID=$INSTANCE_ID"
+
+      - echo "Start SSM port-forward session: local:${LOCAL_FORWARD_PORT} -> ${INSTANCE_ID}:${REMOTE_SONAR_PORT}"
+      - |
+        nohup aws ssm start-session \
+          --region "$AWS_REGION" \
+          --target "$INSTANCE_ID" \
+          --document-name "AWS-StartPortForwardingSession" \
+          --parameters "portNumber=${REMOTE_SONAR_PORT},localPortNumber=${LOCAL_FORWARD_PORT}" \
+          > /tmp/ssm-portforward.log 2>&1 &
+
+      - echo "Wait for SonarQube API on ${SONAR_HOST_URL}..."
+      - |
+        for i in $(seq 1 60); do
+          if curl -fsS "${SONAR_HOST_URL}/api/system/status" >/dev/null 2>&1; then
+            echo "SonarQube is reachable."
+            break
+          fi
+          sleep 2
+          if [ "$i" -eq 60 ]; then
+            echo "ERROR: SonarQube not reachable via port-forward."
+            echo "---- ssm log ----"
+            tail -n 200 /tmp/ssm-portforward.log || true
+            exit 1
+          fi
+        done
+
+  build:
+    commands:
+      - echo "Run Sonar scan"
+      # JS/TS & Web の画面に合わせるなら @sonar/scan を使うのがラク
+      - npx -y @sonar/scan -Dsonar.host.url="${SONAR_HOST_URL}" -Dsonar.token="${SONAR_TOKEN}" -Dsonar.projectKey="${SONAR_PROJECT_KEY}"
+      # 追加指定例（必要なら）
+      # - npx -y @sonar/scan -Dsonar.host.url="${SONAR_HOST_URL}" -Dsonar.token="${SONAR_TOKEN}" -Dsonar.projectKey="${SONAR_PROJECT_KEY}" -Dsonar.sources=src -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+
+  post_build:
+    commands:
+      - echo "Done."
+artifacts:
+  files:
+    - "**/*"
+  discard-paths: yes
